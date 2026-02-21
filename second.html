@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CRUD Supabase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 8px;
+      width: 250px;
+    }
+
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    ul {
+      margin-top: 20px;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      background: white;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Minhas Tasks</h1>
+
+  <input type="text" id="nomeTask" placeholder="Digite a tarefa">
+  <button onclick="adicionarTask()">Adicionar</button>
+
+  <ul id="lista"></ul>
+
+  <script>
+    const SUPABASE_URL = "https://tthrhkeqhaiftdmimkwm.supabase.co/rest/v1/Tasks";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0aHJoa2VxaGFpZnRkbWlta3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NTQzODMsImV4cCI6MjA4NzAzMDM4M30.Fjkr4uI8QWXi9_9SwClNaaTPLhlUK7Nw3dMerBtEvAk";
+
+    // 🔎 Buscar tarefas
+    async function buscarTasks() {
+      const response = await fetch(SUPABASE_URL + "?select=*", {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+
+      const data = await response.json();
+
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      data.forEach(task => {
+        const li = document.createElement("li");
+        li.textContent = task.name + (task.status ? " ✅" : "");
+        lista.appendChild(li);
+      });
+    }
+
+    // ➕ Adicionar tarefa
+    async function adicionarTask() {
+      const nome = document.getElementById("nomeTask").value;
+
+      if (!nome) return alert("Digite uma tarefa!");
+
+      const response = await fetch(SUPABASE_URL, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify({
+          name: nome,
+          status: false
+        })
+      });
+
+      const data = await response.json();
+      console.log("Inserido:", data);
+
+      document.getElementById("nomeTask").value = "";
+
+      buscarTasks(); // atualiza lista
+    }
+
+    // 🚀 Carregar ao abrir página
+    buscarTasks();
+  </script>
+
+</body>
+</html>
